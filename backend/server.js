@@ -42,13 +42,6 @@ app.use("/api/users", userRoute);
 app.use("/api/posts", postRoute);
 app.use("/api/notification", notificationRoute);
 
-if (process.env.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "/frontend/dist")));
-    app.use((req, res) => {
-        res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"))
-    })
-}
-
 connectDB().then(() => {
     app.listen(PORT, () => {
         console.log(`Server is Now Started : ${PORT}`);
