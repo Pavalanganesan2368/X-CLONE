@@ -42,6 +42,14 @@ app.use("/api/users", userRoute);
 app.use("/api/posts", postRoute);
 app.use("/api/notification", notificationRoute);
 
+const frontendPath = path.join(__dirname, "../frontend/dist");
+
+app.use(express.static(frontendPath));
+
+app.get((req, res) => {
+    res.sendFile(path.join(frontendPath, "index.html"));
+})
+
 connectDB().then(() => {
     app.listen(PORT, () => {
         console.log(`Server is Now Started : ${PORT}`);
