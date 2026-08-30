@@ -86,7 +86,7 @@ const ProfilePage = () => {
 	})
 
 	const isMyProfile = authUser?._id === user?._id;
-	const { follow, isPending } = useFollow();
+	const { toggleFollow: follow, isPending } = useFollow();
 	const amIFollowing = authUser?.following.includes(user?._id);
 	
 	return (
@@ -110,7 +110,7 @@ const ProfilePage = () => {
 							{/* COVER IMG */}
 							<div className='relative group/cover'>
 								<img
-									src={coverImg || user?.coverImg || "../../../public/cover-img.png"}
+									src={coverImg || user?.coverImg || "/cover-img.png"}
 									className='h-52 w-full object-cover'
 									alt='cover image'
 								/>
@@ -138,7 +138,7 @@ const ProfilePage = () => {
 								{/* USER AVATAR */}
 								<div className='avatar absolute -bottom-16 left-4'>
 									<div className='w-32 rounded-full relative group/avatar'>
-										<img src={profileImg || user?.profileImg || "../../../public/avatar-placeholder.jpg"} />
+										<img src={profileImg || user?.profileImg || "/avatar-placeholder.jpg"} />
 										<div className='absolute top-5 right-3 p-1 bg-primary rounded-full group-hover/avatar:opacity-100 opacity-0 cursor-pointer'>
 											{isMyProfile && (
 												<MdEdit
@@ -223,7 +223,7 @@ const ProfilePage = () => {
 							</div>
 							<div className='flex w-full border-b border-gray-700 mt-4'>
 								<div
-									className='flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 relative cursor-pointer'
+									className='flex justify-center flex-1 p-3 hover:bg-blue-500 transition duration-300 relative cursor-pointer'
 									onClick={() => setFeedType("posts")}
 								>
 									Posts
@@ -232,7 +232,7 @@ const ProfilePage = () => {
 									)}
 								</div>
 								<div
-									className='flex justify-center flex-1 p-3 text-slate-500 hover:bg-secondary transition duration-300 relative cursor-pointer'
+									className='flex justify-center flex-1 p-3 text-white hover:bg-blue-500 transition duration-300 relative cursor-pointer'
 									onClick={() => setFeedType("likes")}
 								>
 									Likes

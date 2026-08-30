@@ -115,17 +115,24 @@ const { mutate : commentPost, isPending : isCommenting } = useMutation({
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Something went wrong");
+      return data;
     } catch (error) {
       throw error;
     }
   },
 
-  onSuccess : (commentPosts) => {
+  onSuccess : (updatedPost) => {
     toast.success("Comment Posted Successfully!");
     setComment("");
     queryClient.invalidateQueries({ queryKey : ["posts"] });
-    queryClient.setQueryData(["posts"], (newData) => {
-      return newData.map((p) => p._id !== post._id ? { ...p, comment : commentPosts } : p);
+    queryClient.setQueryData(["posts"], (oldData) => {
+      if (!oldData) return [];
+      return oldData.map((p) => {
+        if (p._id === post._id) {
+          return { ...p, comments : updatedPost.comments }
+        }
+        return p;
+      });
     })
   },
 
@@ -164,7 +171,7 @@ const { mutate : commentPost, isPending : isCommenting } = useMutation({
             to={`/profile/${postOwner.username}`}
             className="w-8 rounded-full overflow-hidden"
           >
-            <img src={postOwner.profileImg || "../../../public/avatar-placeholder.jpg"} />
+            <img src={postOwner.profileImg || "/avatar-placeholder.jpg"} />
           </Link>
         </div>
         <div className="flex flex-col flex-1">
@@ -236,7 +243,7 @@ const { mutate : commentPost, isPending : isCommenting } = useMutation({
                             <img
                               src={
                                 comment.user.profileImg ||
-                                "../../../public/avatar-placeholder.jpg"
+                                "/avatar-placeholder.jpg"
                               }
                             />
                           </div>

@@ -52,9 +52,14 @@ const EditProfileModal = () => {
           <h3 className="font-bold text-lg my-3">Update Profile</h3>
           <form
             className="flex flex-col gap-4"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              updateProfile(formData);
+              try {
+                await updateProfile(formData);
+                document.getElementById("edit_profile_modal").close();
+              } catch (err) {
+                // error is handled by mutation
+              }
             }}
           >
             <div className="flex flex-wrap gap-2">

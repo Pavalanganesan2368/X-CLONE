@@ -34,21 +34,21 @@ export const followUnfollow = async (req, res) => {
     const isFollowing = currentUser.following.includes(id);
     if (isFollowing) {
       await User.findByIdAndUpdate(
-        { _id: id },
+        id,
         { $pull: { followers: req.user._id } },
       );
       await User.findByIdAndUpdate(
-        { _id: req.user._id },
+        req.user._id,
         { $pull: { following: id } },
       );
       res.status(200).json({ message: "Unfollow Successfully." });
     } else {
       await User.findByIdAndUpdate(
-        { _id: id },
+        id,
         { $push: { followers: req.user._id } },
       );
       await User.findByIdAndUpdate(
-        { _id: req.user._id },
+        req.user._id,
         { $push: { following: id } },
       );
 
@@ -90,7 +90,7 @@ export const getSuggestedUsers = async (req, res) => {
     ]);
 
     const filteredUser = users.filter(
-      (user) => !userFollowedByMe.following.includes(user._id),
+      (user) => !userFollowedByMe.following.some(id => id.toString() === user._id.toString()),
     );
     const suggestedUsers = filteredUser.slice(0, 4);
 

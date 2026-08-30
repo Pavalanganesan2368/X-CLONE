@@ -8,9 +8,12 @@ import cookieParser from "cookie-parser";
 import cloudinary from "cloudinary";
 import cors from "cors";
 import path from "path";
+import dns from "dns";
 
 import dotenv from "dotenv";
 dotenv.config();
+
+dns.setServers(["0.0.0.0", "8.8.8.8"]);
 
 cloudinary.config({
     cloud_name : process.env.CLOUDINARY_NAME,
@@ -19,8 +22,8 @@ cloudinary.config({
 });
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
-const PORT = process.env.PORT;
 
 app.use(cors({
     origin : "http://localhost:5173",

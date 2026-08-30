@@ -7,33 +7,51 @@ export const createPost = async (req, res) => {
     try {
         const { text } = req.body;
         let { img } = req.body;
-        const userId = req.user._id.toString();
 
-        const user = await User.findOne({ _id : userId });
-        if (!user) return res.status(400).json({ error : "User not Found" });
+        const userId = req.user._id;
 
-        if (!text && !img) return res.status(400).json({ error : "Post must have text or image" });
+        const user = await User.findById(userId);
 
-        if (img) {
-            const uploadedResponse = await cloudinary.uploader.upload(img);
-            img = uploadedResponse.secure_url;
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found"
+            });
         }
 
-        const newPost = new Post({
-            user : userId,
+        if (!text?.trim() && !img) {
+            return res.status(400).json({
+                error: "Post must have text or image"
+            });
+        }
+
+        if (img) {
+            console.log("Uploading image to Cloudinary...");
+
+            const uploadedResponse = await cloudinary.uploader.upload(img, {
+                folder: "posts"
+            });
+
+            img = uploadedResponse.secure_url;
+
+            console.log("Image uploaded:", img);
+        }
+
+        const newPost = await Post.create({
+            user: userId,
             text,
-            img,
+            img
         });
 
-        await newPost.save();
-        res.status(200).json(newPost);
+        return res.status(201).json(newPost);
+
     } catch (error) {
-        console.log("Error in Create Post Controller : "+error.message);
-        res.status(500).json({
-            error : "Internet Server Error"
+        console.log("Error in Delete Post Controller : "+error.message);
+        return res.status(500).json({
+            error: "Internal Server Error",
+            message: error.message
         });
     }
-}
+};
 
 export const deletePost = async (req, res) => {
     try {
@@ -42,14 +60,14 @@ export const deletePost = async (req, res) => {
         const post = await Post.findOne({ _id : id });
         if (!post) return res.status(400).json({ error : "Post not found" });
 
-        if (post.user.toString() !== req.user._id.toString()) res.status(401).json({ error : "You are not authorized to delete this post" });
+        if (post.user.toString() !== req.user._id.toString()) return res.status(401).json({ error : "You are not authorized to delete this post" });
 
         if (post.img) {
             const imgId = post.img.split("/").pop().split(".")[0];
             await cloudinary.uploader.destroy(imgId);
         }
 
-        await Post.findByIdAndDelete({ _id : id });
+        await Post.findByIdAndDelete(id);
         return res.status(200).json({ message : "Post Deleted Successfully." });
     } catch (error) {
         console.log("Error in Delete Post Controller : "+error.message);
@@ -78,6 +96,11 @@ export const createComment = async (req, res) => {
         post.comments.push(comment);
         await post.save();
 
+        await post.populate({
+            path: "comments.user",
+            select: "-password"
+        });
+
         res.status(200).json(post);
     } catch (error) {
         console.log("Error in Create Comment Controller : "+error.message);
@@ -95,7 +118,7 @@ export const likeUnlikePost = async (req, res) => {
         const post = await Post.findOne({ _id : postId });
         if (!post) return res.status(404).json({ error : "Post not found" });
 
-        const userLikedPost = post.likes.includes(userId);
+        const userLikedPost = post.likes.some(id => id.toString() === userId.toString());
         if (userLikedPost) {
             // unlike post
             await Post.updateOne({ _id : postId }, { $pull : { likes : userId }});
@@ -180,7 +203,7 @@ export const getFollowingPosts = async (req, res) => {
     try {
         const userId = req.user._id;
         
-        const user = await User.find({ _id : userId });
+        const user = await User.findById(userId);
         if (!user) return res.status(404).json({ 
             error : "User not found"
         });
@@ -207,8 +230,8 @@ export const getFollowingPosts = async (req, res) => {
 
 export const getUserPosts = async (req, res) => {
     try {
-        const { userName } = req.params;
-        const user = await User.findOne({ userName });
+        const { username } = req.params;
+        const user = await User.findOne({ username });
         if (!user) return res.status(404).json({
             error : "User not found"
         });
